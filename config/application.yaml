@@ -1,5 +1,5 @@
 port: 8080
-schemaDB: person
+schemaDB: public
 
 postgres:
   host: localhost

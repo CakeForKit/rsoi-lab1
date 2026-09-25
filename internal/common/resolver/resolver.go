@@ -11,10 +11,12 @@ import (
 func Resolver[T any](ctx *gin.Context) {
 	var obj T
 	if err := ctx.ShouldBindJSON(&obj); err != nil {
-		panic(custom_error.IllegalArgumentError(err.Error()))
+		utils.AbortContextWithError(ctx, custom_error.IllegalArgumentError(err.Error()))
+		return
 	}
 	if reflect.ValueOf(obj).IsZero() {
-		panic(custom_error.ParseZeroValueError())
+		utils.AbortContextWithError(ctx, custom_error.ParseZeroValueError())
+		return
 	}
 	utils.SetRequestBody(ctx, obj)
 }

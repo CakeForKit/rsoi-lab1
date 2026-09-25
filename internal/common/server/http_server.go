@@ -26,6 +26,7 @@ func NewHttpServer(startupFunc func(*gin.Engine)) Runnable {
 
 func (server *httpServer) Run() error {
 	server.router = gin.New()
+	server.router.Use(gin.Recovery())
 	controller.NewHealthCheckController().RegisterHttpController(server.router)
 
 	server.startupFunc(server.router)

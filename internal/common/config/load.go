@@ -9,6 +9,9 @@ import (
 func Load(config any) error {
 	viperConfig := viper.New()
 	viperConfig.AutomaticEnv()
+	_ = viperConfig.BindEnv("port", "PORT")
+	_ = viperConfig.BindEnv("schemaDB", "SCHEMA_DB")
+	_ = viperConfig.BindEnv("postgres.dsn", "DATABASE_URL")
 	viperConfig.AddConfigPath("./config")
 	viperConfig.SetConfigName("application")
 	viperConfig.SetConfigType("yaml")

@@ -4,20 +4,18 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"uuid"
 
 	"github.com/CakeForKit/rsoi-lab1/internal/common/db"
-	"github.com/CakeForKit/rsoi-lab1/internal/common/utils"
 	"gorm.io/gorm"
 )
 
 type Repository[T any] interface {
-	GetById(ctx context.Context, ids []uuid.UUID) ([]T, error)
+	GetById(ctx context.Context, ids []uint) ([]T, error)
 	GetAll(ctx context.Context) ([]T, error)
 
 	Create(ctx context.Context, entities []T) ([]T, error)
 	Update(ctx context.Context, entities []T) ([]T, error)
-	DeleteById(ctx context.Context, ids []uuid.UUID) error
+	DeleteById(ctx context.Context, ids []uint) error
 }
 
 type postgresRepository[T any] struct {
@@ -33,14 +31,14 @@ func NewPostgresRepository[T any]() (Repository[T], error) {
 	return &postgresRepository[T]{dataSource: dataSource}, nil
 }
 
-func (pgRepo *postgresRepository[T]) GetById(ctx context.Context, ids []uuid.UUID) ([]T, error) {
+func (pgRepo *postgresRepository[T]) GetById(ctx context.Context, ids []uint) ([]T, error) {
 	if len(ids) == 0 {
 		return nil, fmt.Errorf("ids can't be empty")
 	}
 
 	var result []T
 	tx := pgRepo.dataSource.WithContext(ctx)
-	if err := tx.Where("id in ?", utils.Map(ids, func(id uuid.UUID) string { return id.String() })).Find(&result).Error; err != nil {
+	if err := tx.Where("id in ?", ids).Find(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -73,9 +71,9 @@ func (pgRepo *postgresRepository[T]) Update(ctx context.Context, entities []T) (
 	return entities, nil
 }
 
-func (pgRepo *postgresRepository[T]) DeleteById(ctx context.Context, ids []uuid.UUID) error {
+func (pgRepo *postgresRepository[T]) DeleteById(ctx context.Context, ids []uint) error {
 	var entity []T
 	tx := pgRepo.dataSource.WithContext(ctx)
-	result := tx.Where("id in ?", utils.Map(ids, func(it uuid.UUID) string { return it.String() })).Delete(&entity)
+	result := tx.Where("id in ?", ids).Delete(&entity)
 	return result.Error
 }

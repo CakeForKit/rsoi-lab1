@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"sync"
-	"uuid"
 
 	"github.com/CakeForKit/rsoi-lab1/internal/common/custom_error"
 	"github.com/CakeForKit/rsoi-lab1/internal/common/model"
@@ -14,12 +13,12 @@ var personSrv PersonService
 var personSrvMutex sync.Mutex
 
 type PersonService interface {
-	GetById(ctx context.Context, id uuid.UUID) (model.Person, error)
+	GetById(ctx context.Context, id uint) (model.Person, error)
 	GetAll(ctx context.Context) ([]model.Person, error)
 
 	Create(ctx context.Context, person model.Person) (model.Person, error)
-	Update(ctx context.Context, person model.Person) (model.Person, error)
-	DeleteById(ctx context.Context, id uuid.UUID) error
+	Update(ctx context.Context, id uint, update model.PersonUpdate) (model.Person, error)
+	DeleteById(ctx context.Context, id uint) error
 }
 
 type personService struct {
@@ -43,8 +42,8 @@ func GetPersonService() (PersonService, error) {
 	return personSrv, nil
 }
 
-func (service *personService) GetById(ctx context.Context, id uuid.UUID) (model.Person, error) {
-	persons, err := service.repository.GetById(ctx, []uuid.UUID{id})
+func (service *personService) GetById(ctx context.Context, id uint) (model.Person, error) {
+	persons, err := service.repository.GetById(ctx, []uint{id})
 	if err != nil {
 		return model.Person{}, err
 	}
@@ -66,7 +65,23 @@ func (service *personService) Create(ctx context.Context, person model.Person) (
 	return persons[0], err
 }
 
-func (service *personService) Update(ctx context.Context, person model.Person) (model.Person, error) {
+func (service *personService) Update(ctx context.Context, id uint, update model.PersonUpdate) (model.Person, error) {
+	person, err := service.GetById(ctx, id)
+	if err != nil {
+		return model.Person{}, err
+	}
+	if update.Name != nil {
+		person.Name = *update.Name
+	}
+	if update.Age != nil {
+		person.Age = *update.Age
+	}
+	if update.Address != nil {
+		person.Address = *update.Address
+	}
+	if update.Work != nil {
+		person.Work = *update.Work
+	}
 	persons, err := service.repository.Update(ctx, []model.Person{person})
 	if err != nil {
 		return model.Person{}, err
@@ -74,6 +89,9 @@ func (service *personService) Update(ctx context.Context, person model.Person) (
 	return persons[0], err
 }
 
-func (service *personService) DeleteById(ctx context.Context, id uuid.UUID) error {
-	return service.repository.DeleteById(ctx, []uuid.UUID{id})
+func (service *personService) DeleteById(ctx context.Context, id uint) error {
+	if _, err := service.GetById(ctx, id); err != nil {
+		return err
+	}
+	return service.repository.DeleteById(ctx, []uint{id})
 }

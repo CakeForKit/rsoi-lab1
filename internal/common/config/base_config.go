@@ -14,5 +14,6 @@ type GormProperty struct {
 	Database string `yaml:"database,omitempty"`
 	Username string `yaml:"username,omitempty"`
 	Password string `yaml:"password,omitempty"`
+	DSN      string `yaml:"dsn,omitempty"`
 	ShowSql  bool   `yaml:"showSql,omitempty"`
 }

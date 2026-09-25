@@ -29,7 +29,10 @@ func GetPostgresDataSource() *gorm.DB {
 }
 
 func newDataSource(properties config.GormProperty) *gorm.DB {
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", properties.Username, properties.Password, properties.Host, properties.Port, properties.Database)
+	dsn := properties.DSN
+	if dsn == "" {
+		dsn = fmt.Sprintf("postgres://%s:%s@%s:%d/%s", properties.Username, properties.Password, properties.Host, properties.Port, properties.Database)
+	}
 	namingStrategy := schema.NamingStrategy{
 		TablePrefix:   config.CoreConfig.SchemaDB + ".",
 		SingularTable: true,
