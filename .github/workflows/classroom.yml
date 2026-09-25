@@ -27,11 +27,9 @@ jobs:
         run: docker build --tag person-service:${{ github.sha }} .
 
       - name: Deploy to Render
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.RENDER_DEPLOY_HOOK != ''
         run: curl --fail --silent --show-error --request POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
 
       - name: Wait for Render service
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.RENDER_DEPLOY_HOOK != '' && vars.RENDER_SERVICE_URL != ''
         run: |
           for attempt in {1..30}; do
             if curl --fail --silent "${{ vars.RENDER_SERVICE_URL }}/health"; then exit 0; fi
@@ -40,7 +38,6 @@ jobs:
           exit 1
 
       - name: Run API Tests
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && secrets.RENDER_DEPLOY_HOOK != '' && vars.RENDER_SERVICE_URL != ''
         uses: matt-ball/newman-action@master
         with:
           collection: postman/[inst] Lab1.postman_collection.json
