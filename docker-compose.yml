@@ -1,18 +1,24 @@
 version: "3"
+
 services:
   postgres:
     image: library/postgres:13
-    container_name: postgres
+    container_name: rsoi_1
     restart: on-failure
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: postgres
+      POSTGRES_USER: rsoi_1
+      POSTGRES_PASSWORD: "rsoi_1"
+      POSTGRES_DB: rsoi_1
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./postgres/:/docker-entrypoint-initdb.d/
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rsoi_1 -d rsoi_1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db-data:
